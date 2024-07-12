@@ -21,11 +21,13 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 
 
-df = pd.read_csv("C:/Users/edwar/Desktop/working/Insuarance Project/Car insuarance.csv/test.csv")
+df = pd.read_csv("C:/Users/edwar/Desktop/working/Insuarance Project/Health insuarance/Data/test.csv")
 
 
 print(df.shape)
 print(df.info())
+
+# Start of Data preparation
 
 #
 #
@@ -97,15 +99,19 @@ print(df[['Age', 'Age-Groups']])
 
 df['MonthlyWages'] = df['WeeklyWages']*4
 
+## Combining both Dependents Children and Dependents Other 
+
 df['Dependents'] = df['DependentChildren'] + df['DependentsOther']
 
 #
 #
 #
-#
-#
 
 # EDA
+
+#
+#
+#
 
 ## Date Time Analysis
 
@@ -121,9 +127,6 @@ df['ReportedYear'] = df['DateReported'].dt.year
 df['ReportedMonth'] = df['DateReported'].dt.month
 df['ReportedDay'] = df['DateReported'].dt.day
 
-#
-#
-#
 
 #### Histogram
 
@@ -194,11 +197,6 @@ plt.tight_layout()
 plt.show()
 
 
-
-#
-#
-#
-
 #### Box plot
 
 ## Lag Time distribution
@@ -241,11 +239,7 @@ plt.title('Weekly Wage Distribution')
 plt.tight_layout()
 plt.show()
 
-#
-
 # AGE GROUPS ANALYSIS
-
-#
 
 #### Distribution of Age groups
 
@@ -298,9 +292,6 @@ plt.title('Average incurred cost by Gender')
 
 plt.xlabel('Gender')
 plt.show()
-
-#
-#
 
 # L A G  T I M E
 
@@ -368,15 +359,9 @@ plt.xlabel('Lag Time(days)')
 plt.ylabel('Incurred Claim Cost')
 plt.show()
 
-#
-#
-#
-#
+# Time series analysis of the LAG TIME and Monthly Claim Cost
 
-# Time series analysis of the LAG TIME
-
-#
-#
+## Lag time
 
 df['AccidentMonthYear'] = df['DateTimeOfAccident'].dt.to_period('M') # Monthly aggregation
 monthly_lag = df.groupby('AccidentMonthYear')['LagTime'].mean().reset_index()
@@ -384,10 +369,10 @@ monthly_lag = df.groupby('AccidentMonthYear')['LagTime'].mean().reset_index()
 monthly_lag['AccidentMonthYear'] = monthly_lag['AccidentMonthYear'].dt.to_timestamp()
 monthly_lag.set_index('AccidentMonthYear', inplace=True)
 
+# Monthly claim cost
+
 monthly_claim_cost = df.groupby('AccidentMonthYear')['InitialIncurredCalimsCost'].mean().reset_index()
 
-
-#
 
 plt.figure(figsize=(20,6))
 plt.plot(monthly_lag.index, monthly_lag['LagTime'], marker='o', linestyle='-')
@@ -431,11 +416,6 @@ plt.figure(figsize=(12,6))
 decomposition.plot()
 plt.show()
 
-
-#
-#
-#
-
 # Correlation Analysis
 
 ## Correlation Matrix
@@ -465,9 +445,11 @@ plt.show()
 #
 #
 
-
 # Feature Importance
 
+#
+#
+#
 
 ## Random Forest
 
@@ -509,10 +491,6 @@ sns.barplot(x='Importance', y='Feature', data=importance_df)
 plt.title('Feature Importance by Random forest')
 plt.show()
 
-
-#
-#
-
 ## Coefficient - Linear Regression
 
 scaler = StandardScaler()
@@ -550,93 +528,14 @@ sns.barplot(x='Absolute Coefficient', y='Feature', data=importance_coeff_df)
 plt.title('Feature Importance (Coefficient-Based)')
 plt.show()
 
+df_final = df.drop([
+    'DateTimeOfAccident', 'DependentChildren', 'DependentsOther', 'PartTimeFullTime', 
+    'HoursWorkedPerWeek', 'DaysWorkedPerWeek', 'ClaimDescription'
+    ], axis=1)
 
-#
-#
-#
-#
-#
+df_final.to_csv('Final_Health_insurance_data.csv', index=False)
 
-
-# MODELING 
-
-#
-#
-#
-#
-
-## Data Preparation
-
-model_features = ['DateReported', 'Age', 'Gender', 'MaritalStatus', 'WeeklyWages', 'Dependents']
-
-df['DateReported'] = pd.to_datetime(df['DateReported'])
-
-
-## date reported to Numerical format, days form ref_date
-
-ref_date = df['DateReported'].min()
-
-df['DaysFromRef'] = (df['DateReported'] - ref_date).dt.days
-
-# replace Datereported
-
-model_features.remove('DateReported')
-
-model_features.append('DaysFromRef')
-
-
-# select data for modeling
-
-x = df[model_features]
-
-y = df[target]
-
-x_train, y_test, x_train, y_test = train_test_split(x, y,test_size=0.2, random_state=42)
-
-# Initialize Model
-
-model = LinearRegression()
-
-# Fit model to training data
-
-model.fit(x_train, y_train)
-
-#
-#
-#
-
-# Evaluate Model
-
-y_pred = model.predict(x_test)
-
-# evaluation
-
-lr_mse = mean_squared_error(y_test, y_pred)
-lr_rmse = np.sqrt(lr_mse)
-lr_r2 = r2_score(y_test, y_pred)
-
-# model coefficients
-
-model_coeff = pd.DataFrame(model.coef_, x.columns, columns=['Coefficient'])
-
-# Plot predicted vs actual values
-
-plt.figure(figsize=(10,6))
-plt.scatter(y_test, y_pred, alpha=0.7)
-plt.plot([y.min(), y.max()], [y.min(), y.max()], color='red', linestyle='--', lw=2)
-plt.xlabel('Actual Claim Cost')
-plt.ylabel('Predicted Claim Cost')
-plt.title('Actual vs Predicted Claim Cost')
-plt.show()
-
-
-
-
-
-
-
-
-
+# End of Data preparation
 
 
 
