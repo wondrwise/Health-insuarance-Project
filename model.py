@@ -36,6 +36,7 @@ target = 'InitialIncurredCalimsCost'
 
 df['DateReported'] = pd.to_datetime(df['DateReported'])
 
+df.set_index('ClaimNumber', inplace=True)
 
 ## date reported to Numerical format, days form ref_date
 
@@ -56,7 +57,7 @@ x = df[model_features]
 
 y = df[target]
 
-x_train, y_test, x_train, y_test = train_test_split(x, y,test_size=0.2, random_state=42)
+x_train, x_test, y_train, y_test = train_test_split(x, y,test_size=0.2, random_state=42)
 
 # Initialize Model
 
