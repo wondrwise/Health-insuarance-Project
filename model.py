@@ -19,6 +19,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import MinMaxScaler
 
 df = pd.read_csv('Final_Health_insurance_data.csv')
 
@@ -59,6 +60,17 @@ y = df[target]
 
 x_train, x_test, y_train, y_test = train_test_split(x, y,test_size=0.2, random_state=42)
 
+
+# Sclaling 
+
+scaler = MinMaxScaler()
+
+features_to_scale= ['WeeklyWages','DaysFromRef','Age','Dependents']
+
+x_train[features_to_scale] = scaler.fit_transform(x_train[features_to_scale])
+
+x_test[features_to_scale] = scaler.fit_transform(x_test[features_to_scale])
+
 # Initialize Model
 
 model = LinearRegression()
@@ -95,8 +107,12 @@ plt.ylabel('Predicted Claim Cost')
 plt.title('Actual vs Predicted Claim Cost')
 plt.show()
 
-
-
+plt.figure(figsize=(10,6))
+plt.scatter(y_test, alpha=0.7)
+plt.xlabel('Actual Claim Cost')
+plt.ylabel('Predicted Claim Cost')
+plt.title('Actual vs Predicted Claim Cost')
+plt.show()
 
 
 
